@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>E-Commerce Platform with User Accounts</title>
+  <style>
+    /* CSS Styles */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    .header {
+      background-color:cyan;
+      color:black;
+      padding: 15px;
+      text-align: center;
+    }
+
+    .header nav ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+    }
+
+    .header nav ul li {
+      margin: 0 25px;
+    }
+
+    .header nav ul li a {
+      color:blueviolet;
+      text-decoration: none;
+      
+    }
+    
+    .header nav ul li a:hover{
+      background-color:white; /* Highlight color */
+      transform: scale(5.1); 
+    }
+    
+
+    .account-section, .product-section, .cart-section {
+      padding: 20px;
+    }
+
+    .form-container {
+      max-width: 300px;
+      margin: 0 auto;
+    }
+
+    .form-container input {
+      width:70%;
+      padding: 10px;
+      margin: 10px 0;
+    }
+
+    .form-container button {
+      width: 80%;
+      padding: 10px;
+      background-color:gold;
+      color:black;
+      border: none;
+    }
+    button:hover{
+      background-color:darkgreen;
+    }
+    
+    .product-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+
+    .product-card {
+      border: 2px solid blueviolet;
+      padding: 15px;
+      width: 200px;
+      text-align: center;
+    }
+
+    footer {
+      background-color: #333;
+      color: white;
+      text-align: center;
+      padding: 10px;
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      height:5vh;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <h1>E-Commerce Platform</h1>
+    <nav>
+      <ul>
+        <li><a href="#account">Account</a></li>
+        <li><a href="#products">Shop</a></li>
+        <li><a href="#cart">Cart</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- Account Section -->
+  <section id="account" class="account-section">
+    <h2 style=color:darkgreen>Account</h2>
+    <div id="account-area" class="form-container"></div>
+  </section>
+
+  <!-- Product Section -->
+  <main id="products" class="product-section" style="display: none;">
+    <h2 style=color:cadetblue> Our Products</h2>
+    <div id="product-list" class="product-list"></div>
+  </main>
+
+  <!-- Cart Section -->
+  <section id="cart" class="cart-section" style="display: none;">
+    <h2 style=color:firebrick>Your Cart</h2>
+    <div id="cart-items"></div>
+    <p>Total: $<span id="cart-total">0.00</span></p>
+    <button id="checkout-btn">Checkout</button>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>&copy; 2024 E-Commerce Platform</p>
+  </footer>
+
+  <script>
+    // JavaScript Code
+    const products = [
+      { id: 1, name: 'Product A', price: 10.99, image: 'shoe1.png' },
+      { id: 2, name: 'Product B', price: 15.99, image: 'shoe2.png' },
+      { id: 3, name: 'Product C', price: 20.99, image: 'shoe3.png' },
+      { id: 3, name: 'Product C', price: 20.99, image: 'shoe4.png' },
+      { id: 3, name: 'Product C', price: 20.99, image: 'shoe5.png' },
+      { id: 3, name: 'Product C', price: 20.99, image: 'shoe6.png' },
+      { id: 3, name: 'Product C', price: 20.99, image: 'shoe7.png' },
+      { id: 3, name: 'Product C', price: 20.99, image: 'shoe8.png' },
+      
+    ];
+
+    const cart = [];
+    let currentUser = null;
+
+    // Display products
+    function displayProducts() {
+      const productList = document.getElementById('product-list');
+      productList.innerHTML = '';
+      products.forEach((product) => {
+        const productCard = document.createElement('div');
+        productCard.classList.add('product-card');
+        productCard.innerHTML = `
+          <img src="${product.image}" alt="${product.name}" width="150">
+          <h3>${product.name}</h3>
+          <p>$${product.price}</p>
+          <button onclick="addToCart(${product.id})">Add to Cart</button>
+        `;
+        productList.appendChild(productCard);
+      });
+    }
+
+    // Add product to cart
+    function addToCart(productId) {
+      const product = products.find((p) => p.id === productId);
+      cart.push(product);
+      updateCart();
+    }
+
+    // Update cart
+    function updateCart() {
+      const cartItems = document.getElementById('cart-items');
+      const cartTotal = document.getElementById('cart-total');
+      cartItems.innerHTML = '';
+      let total = 0;
+
+      cart.forEach((item) => {
+        const cartItem = document.createElement('div');
+        cartItem.textContent = `${item.name} - $${item.price}`;
+        cartItems.appendChild(cartItem);
+        total += item.price;
+      });
+
+      cartTotal.textContent = total.toFixed(2);
+    }
+
+    // User account handling
+    function displayAccountForm() {
+      const accountArea = document.getElementById('account-area');
+      if (currentUser) {
+        accountArea.innerHTML = `
+          <p>Welcome, ${currentUser}!</p>
+          <button onclick="logout()">Logout</button>
+        `;
+        document.getElementById('products').style.display = 'block';
+        document.getElementById('cart').style.display = 'block';
+      } else {
+        accountArea.innerHTML = `
+          <h3>Login or Register</h3>
+          <input type="text" id="username" placeholder="Username" required>
+          <button onclick="login()">Login</button>
+          <button onclick="register()">Register</button>
+        `;
+        document.getElementById('products').style.display = 'none';
+        document.getElementById('cart').style.display = 'none';
+      }
+    }
+
+    // Login function
+    function login() {
+      const username = document.getElementById('username').value.trim();
+      const users = JSON.parse(localStorage.getItem('users')) || [];
+      if (users.includes(username)) {
+        currentUser = username;
+        alert('Login successful!');
+        displayAccountForm();
+      } else {
+        alert('User not found. Please register first.');
+      }
+    }
+
+    // Register function
+    function register() {
+      const username = document.getElementById('username').value.trim();
+      if (username) {
+        const users = JSON.parse(localStorage.getItem('users')) || [];
+        if (!users.includes(username)) {
+          users.push(username);
+          localStorage.setItem('users', JSON.stringify(users));
+          alert('Registration successful!');
+        } else {
+          alert('User already exists.');
+        }
+      } else {
+        alert('Username cannot be empty.');
+      }
+    }
+
+    // Logout function
+    function logout() {
+      currentUser = null;
+      displayAccountForm();
+    }
+
+    // Initialize
+    displayAccountForm();
+    displayProducts();
+  </script>
+</body>
+</html>
